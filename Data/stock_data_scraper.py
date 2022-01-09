@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 
 def clean_input_data():
-    with open('dirty_list.csv', 'r') as file:
+    with open('stock_list.csv', 'r') as file:
         input_stock_list = csv.reader(file)
         stock_list = []
         for item in input_stock_list:
