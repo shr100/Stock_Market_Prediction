@@ -4,9 +4,12 @@ import requests
 import pandas as pd
 from datetime import datetime
 from bs4 import BeautifulSoup
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
-def clean_input_data():
+def prep_input_data():
     with open('stock_list.csv', 'r') as file:
         input_stock_list = csv.reader(file)
         stock_list = []
@@ -50,7 +53,6 @@ def web_scraper(ticker):
 
     for i, item in enumerate(ticker):
         # Request to website and download HTML contents
-        print(i+1)
         url = f'https://finance.yahoo.com/quote/{item}/history'
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
@@ -84,12 +86,41 @@ def web_scraper(ticker):
     df.to_csv('./scraped_data.csv')
 
 
+def clean_data():
+    # Drop rows with more than 50% of values missing
+    df = pd.read_csv('scraped_data.csv', header=0, sep=',')
+
+    # Drop the first column of indexes read from the input csv file
+    df.drop(columns=df.columns[0], axis=1, inplace=True)
+
+    print(f'Shape of data before dropping rows = {df.shape}')
+    column_count_threshold = df.shape[1]/2
+
+    df['count'] = df.isnull().sum(axis=1)
+
+    for index, row in df.iterrows():
+        if row['count'] > column_count_threshold:
+            df = df.drop(index)
+    df.drop(['count'], axis=1, inplace=True)
+
+    print(f'Shape of data after dropping rows = {df.shape}')
+
+    # Fill empty cells with the mean stock value
+    df.fillna(df.mean(), inplace=True)
+    df = df.round(2)
+
+    df.to_csv('./cleaned_data.csv')
+
+
 def main():
     # To clean list of stocks and remove duplicates
-    stock_list = clean_input_data()
+    stock_list = prep_input_data()
 
     # To scrape the Yahoo finance website for each of the cleaned list of stocks
     web_scraper(stock_list)
+
+    # Clean the scraped data
+    clean_data()
 
 
 main()
