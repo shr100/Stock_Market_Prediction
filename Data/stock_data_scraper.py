@@ -92,6 +92,7 @@ def clean_data():
 
     # Drop the first column of indexes read from the input csv file
     df.drop(columns=df.columns[0], axis=1, inplace=True)
+    df.set_index('Ticker', inplace=True)
 
     print(f'Shape of data before dropping rows = {df.shape}')
     column_count_threshold = df.shape[1]/2
@@ -106,9 +107,10 @@ def clean_data():
     print(f'Shape of data after dropping rows = {df.shape}')
 
     # Fill empty cells with the mean stock value
-    df.fillna(df.mean(), inplace=True)
-    df = df.round(2)
+    for item in df.index:
+        df.loc[item] = df.loc[item].fillna(value=df.loc[item].mean())
 
+    df = df.round(2)
     df.to_csv('./cleaned_data.csv')
 
 
