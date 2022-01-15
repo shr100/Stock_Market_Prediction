@@ -107,9 +107,10 @@ def clean_data():
     print(f'Shape of data after dropping rows = {df.shape}')
 
     # Fill empty cells with the mean stock value
-    df.fillna(df.mean(), inplace=True)
-    df = df.round(2)
+    for item in df.index:
+        df.loc[item] = df.loc[item].fillna(value=df.loc[item].mean())
 
+    df = df.round(2)
     df.to_csv('./cleaned_data.csv')
 
 
