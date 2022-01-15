@@ -92,6 +92,7 @@ def clean_data():
 
     # Drop the first column of indexes read from the input csv file
     df.drop(columns=df.columns[0], axis=1, inplace=True)
+    df.set_index('Ticker', inplace=True)
 
     print(f'Shape of data before dropping rows = {df.shape}')
     column_count_threshold = df.shape[1]/2
